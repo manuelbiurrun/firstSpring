@@ -3,7 +3,9 @@ package com.example.demo.student;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.Period;
 
 @Entity(name = "Student")
 @Table(
@@ -18,7 +20,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @EqualsAndHashCode
-public class Student {
+public class Student implements Serializable {
 
     @Id
     @SequenceGenerator(
@@ -51,14 +53,19 @@ public class Student {
             unique = true
     )
     private String email;
+    private LocalDate dob;
     @Transient
     private Integer age;
-    private LocalDate dob;
+    private String imageUrl;
+    private String phone;
 
-    public Student(String name, String email, LocalDate dob) {
+    public Student(String name, String email, LocalDate dob, String imageUrl, String phone) {
         this.name = name;
         this.email = email;
         this.dob = dob;
+        this.imageUrl = imageUrl;
+        this.age = Period.between(this.dob, LocalDate.now()).getYears();
+        this.phone = phone;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.example.demo.student;
 
+import com.example.demo.exceptions.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class StudentService {
 
     private final StudentRepository studentRepository;
@@ -23,29 +25,21 @@ public class StudentService {
         return studentRepository.findAll();
     }
 
-    public void addNewStudent(Student student) {
+    public Student getStudentById(Long id) {
+        return studentRepository.findStudentById(id).orElseThrow(() -> new UserNotFoundException("User with id " + id + " was not found"));
+    }
+
+    public Student addNewStudent(Student student) {
         Optional<Student> studentOptional = studentRepository.findStudentByEmail(student.getEmail());
         if(studentOptional.isPresent()) {
             throw new IllegalStateException("email taken");
         }
-        studentRepository.save(student);
+        return studentRepository.save(student);
     }
 
     @Transactional
-    public void updateStudent(Long studentId, String name, String email) {
-        Student studentById = studentRepository.findById(studentId).orElseThrow(() -> new IllegalStateException("student with id: " + studentId + " does not exist"));
-        if(name != null && name.length() > 0 && !Objects.equals(studentById.getName(), name)) {
-            studentById.setName(name);
-        }
-
-        if(email != null && email.length() > 0 && !Objects.equals(studentById.getEmail(), email)) {
-            Optional<Student> studentOptional = studentRepository.findStudentByEmail(email);
-            if(studentOptional.isPresent()) {
-                throw new IllegalStateException("email taken");
-            }
-            studentById.setEmail(email);
-        }
-        studentRepository.save(studentById);
+    public Student updateStudent(Student student) {
+        return studentRepository.save(student);
     }
 
     public void deleteStudent(Long studentId) {
@@ -53,6 +47,6 @@ public class StudentService {
         if(!exists) {
             throw new IllegalStateException("student with id: " + studentId + " does not exist");
         }
-        studentRepository.deleteById(studentId);
+        studentRepository.deleteStudentById(studentId);
     }
 }

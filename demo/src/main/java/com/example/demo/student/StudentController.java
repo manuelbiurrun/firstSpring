@@ -1,6 +1,9 @@
 package com.example.demo.student;
 
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
@@ -17,23 +20,33 @@ public class StudentController {
         this.studentService = studentService;
     }
 
-    @GetMapping
-    public List<Student> getStudents() {
-        return studentService.getStudents();
+    @GetMapping("/all")
+    public ResponseEntity<List<Student>> getStudents() {
+        List<Student> students = studentService.getStudents();
+        return new ResponseEntity<>(students, HttpStatus.OK);
     }
 
-    @PostMapping
-    public void registerNewStudent(@RequestBody Student student) {
-        studentService.addNewStudent(student);
+    @GetMapping("/find/{id}")
+    public ResponseEntity<Student> getStudentById(@PathVariable("id") Long id) {
+        Student student = studentService.getStudentById(id);
+        return new ResponseEntity<>(student, HttpStatus.OK);
     }
 
-    @PutMapping(path = "{studentId}")
-    public void updateStudent(@PathVariable("studentId") Long studentId, @RequestParam(required = false) String name, @RequestParam(required = false)String email) {
-        studentService.updateStudent(studentId, name, email);
+    @PostMapping("/add")
+    public ResponseEntity<Student> registerNewStudent(@RequestBody Student student) {
+        Student newStudent = studentService.addNewStudent(student);
+        return new ResponseEntity<>(newStudent, HttpStatus.CREATED);
     }
 
-    @DeleteMapping(path = "{studentId}")
-    public void deleteStudent(@PathVariable("studentId") Long studentId) {
+    @PutMapping(path = "/update")
+    public ResponseEntity<Student> updateStudent(@RequestBody Student student) {
+        Student updatedStudent = studentService.updateStudent(student);
+        return new ResponseEntity<>(updatedStudent, HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "/delete/{studentId}")
+    public ResponseEntity<?> deleteStudent(@PathVariable("studentId") Long studentId) {
         studentService.deleteStudent(studentId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
